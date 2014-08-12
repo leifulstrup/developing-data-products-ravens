@@ -18,12 +18,13 @@ shinyUI(fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
+      a(img(src = "http://prod.static.ravens.clubs.nfl.com/assets/img/raven-logo.png"), href= "http:///baltimoreravens.com"),
       plotOutput("ProbabilityPlot"),
       textOutput('computeProbability'),
       p(""),
       textOutput('confidenceBounds'),
       p(""),
-      p('Upper and Lower Confidence Level using +/- 2 SD -> @ 95%')
+      em('[Note: Upper and Lower Confidence Level using +/- 2 SD -> @ 95%]')
     )
   )
 ))
