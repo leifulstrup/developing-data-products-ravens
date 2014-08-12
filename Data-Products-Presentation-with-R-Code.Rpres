@@ -1,0 +1,84 @@
+Predicting Win Probability - Ravens 2014
+========================================================
+author: Leif Ulstrup
+date: August 12, 2014
+title: JHU Developing Data Products Class Project
+
+Premise
+========================================================
+
+The probabilty of the [Baltimore Ravens](http://www.baltimoreravens.com) (under quarterback [Joe Flacco](http://en.wikipedia.org/wiki/Joe_Flacco)) winning a game in 2014 can be predicted using 2008-2013 Win/Loss data to create a generalized linear model relating wins to Ravens points scored.
+
+- Joe Flacco began as Ravens quarterback at the start of the 2008 Season
+- Strong offense performance reduces the dependence on defense
+- It is fun for fans to assess win probability in the middle of a game
+
+A Shiny web application was created to enable Ravens fans to predict win probability by inputing the current score.
+
+Predicting Ravens Win Prob vs Ravens Score
+========================================================
+
+```{r load-packages, echo=FALSE, message=FALSE, warning=FALSE, results = 'hide'}  
+# results='hide' supresses the warnings
+
+# load package to read excel files
+suppressWarnings(install.packages("xlsx", repos='http://cran.us.r-project.org')) # need to set CRAN source or it ejects error
+suppressWarnings(library(xlsx))
+
+```
+```{r process-data, echo=FALSE, message=FALSE, warning=FALSE, results = 'hide'}
+#assumes the Ravens 2008 to Present Score Excel file is present in diretory
+# add check on whether that is true
+
+RavensSummary <- read.xlsx("Ravens-since-2008.xlsx",1) # sheet 1 has the summary info
+RavensScores <- read.xlsx("Ravens-since-2008.xlsx",2) # sheet 2 has the scores for all games since 2008 season (since Joe Flacco showed up)
+
+# add column of binary 1 for Wins
+RavensScores$Wins <- ifelse(RavensScores$WinOrLoss == "W", 1, 0)
+
+# develop a generalized linear model for predicting Win based on Ravens Score
+logRavens <- glm(RavensScores$WinOrLoss ~ RavensScores$Ravens, family="binomial") # use Regression class model with my new 5 year history info
+
+# function to predict Ravens probability of a win based on beta0 and beta1 coefficients - generalized so I can plug in confidence intervals
+probWin <- function(score, beta0, beta1) {1/(1+exp(-1*(beta0+ score* beta1)))}
+
+beta0 <- coef(logRavens)[1] # get intercept
+beta1 <- coef(logRavens)[2] # get slope
+
+RavensConfInt <- confint(logRavens)
+
+beta0Lower <- RavensConfInt[1]
+beta0Upper <- RavensConfInt[3]
+beta1Lower <- RavensConfInt[2]
+beta1Upper <- RavensConfInt[4]
+
+inputScores <- seq(0,60, by = 1)
+
+probRavensMiddle <- probWin(inputScores, beta0, beta1)
+probRavensUpper <- probWin(inputScores, beta0Upper, beta1Upper)
+probRavensLower <- probWin(inputScores, beta0Lower, beta1Lower)
+
+```
+```{r, echo=FALSE}
+plot(inputScores, probRavensMiddle, ylab="Probability of Ravens Win", xlab="Ravens Score", main="GLM using Ravens 2008-2013 Seasons\n with Upper and Lower 95% Confidence Intervals")
+lines(probRavensUpper, col="blue")
+lines(probRavensLower, col="red")
+```
+
+Link to Shiny Application
+========================================================
+
+
+Future Explorations
+========================================================
+
+Potential future predictive model explorations might include:
+
+- consideration of Home vs Away game as a factor
+- Quarter of Play & Time Remaining
+- Greater Weighting to Current Season Adjustments
+- Inclusion of factors such as Turnover Ratio
+- Inclusion of Defense and Offense Key performance and Time Remaining
+- Experiment with Machine Learning Methods
+
+GO RAVENS! 
