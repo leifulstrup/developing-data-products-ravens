@@ -1,7 +1,7 @@
 require(shiny)
 
 # load package to read excel files
-suppressWarnings(install.packages("xlsx", repos='http://cran.us.r-project.org')) # need to set CRAN source or it ejects error
+# suppressWarnings(install.packages("xlsx", repos='http://cran.us.r-project.org')) # need to set CRAN source or it ejects error
 suppressWarnings(require(xlsx))
 #assumes the Ravens 2008 to Present Score Excel file is present in diretory
 # add check on whether that is true
